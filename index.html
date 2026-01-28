@@ -23,11 +23,11 @@
                         mono: ['JetBrains Mono', 'monospace'],
                     },
                     animation: {
-                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'fade-in-up': 'fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                     },
                     keyframes: {
                         fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(40px)' },
+                            '0%': { opacity: '0.01', transform: 'translateY(20px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
                         }
                     }
@@ -35,6 +35,8 @@
             }
         }
     </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
@@ -1118,12 +1120,37 @@
     <script>
         lucide.createIcons();
 
-        // --- WAVE ANIMATION ---
+        // --- WAVE ANIMATION OPTIMIZED ---
         const canvas = document.getElementById('wave-canvas'); const ctx = canvas.getContext('2d');
         let width, height, waves = [];
-        class Wave { constructor(y, color, speed, amplitude) { this.y = y; this.color = color; this.speed = speed; this.amplitude = amplitude; this.offset = Math.random() * 100; } draw(time) { ctx.beginPath(); ctx.moveTo(0, this.y); for (let i = 0; i < width; i++) { ctx.lineTo(i, this.y + Math.sin(i * 0.003 + time * this.speed + this.offset) * this.amplitude); } ctx.lineTo(width, height); ctx.lineTo(0, height); ctx.closePath(); ctx.fillStyle = this.color; ctx.fill(); } }
-        function init() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; waves = [new Wave(height * 0.6, 'rgba(59, 130, 246, 0.05)', 0.002, 50), new Wave(height * 0.7, 'rgba(139, 92, 246, 0.05)', 0.003, 40)]; }
-        let time = 0; function animate() { ctx.clearRect(0, 0, width, height); const gradient = ctx.createRadialGradient(width / 2, height * 0.3, 0, width / 2, height, width); gradient.addColorStop(0, '#0f172a'); gradient.addColorStop(1, '#000000'); ctx.fillStyle = gradient; ctx.fillRect(0, 0, width, height); waves.forEach(wave => wave.draw(time)); time += 1; requestAnimationFrame(animate); }
+        // Mobile Optimization: Reduce resolution on small screens
+        const dpr = window.devicePixelRatio || 1;
+        const isMobile = window.innerWidth < 768;
+        const resolution = isMobile ? 0.5 : 1;
+
+        class Wave { constructor(y, color, speed, amplitude) { this.y = y; this.color = color; this.speed = speed; this.amplitude = amplitude; this.offset = Math.random() * 100; } draw(time) { ctx.beginPath(); ctx.moveTo(0, this.y); for (let i = 0; i < width; i += (isMobile ? 10 : 1)) { ctx.lineTo(i, this.y + Math.sin(i * 0.003 + time * this.speed + this.offset) * this.amplitude); } ctx.lineTo(width, height); ctx.lineTo(0, height); ctx.closePath(); ctx.fillStyle = this.color; ctx.fill(); } }
+
+        function init() {
+            width = canvas.width = window.innerWidth * resolution;
+            height = canvas.height = window.innerHeight * resolution;
+            // Scale context to match if not full res (optional, but keep simple for perf)
+            // if(resolution !== 1) ctx.scale(resolution, resolution);
+
+            waves = [new Wave(height * 0.6, 'rgba(59, 130, 246, 0.05)', 0.002, 50), new Wave(height * 0.7, 'rgba(139, 92, 246, 0.05)', 0.003, 40)];
+        }
+
+        let time = 0;
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            const gradient = ctx.createRadialGradient(width / 2, height * 0.3, 0, width / 2, height, width);
+            gradient.addColorStop(0, '#0f172a');
+            gradient.addColorStop(1, '#000000');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+            waves.forEach(wave => wave.draw(time));
+            time += 1;
+            requestAnimationFrame(animate);
+        }
         window.addEventListener('resize', init); init(); animate();
 
         // --- SCROLL REVEAL ---
