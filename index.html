@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Dashboard strategico per la candidatura di Giovanni E. Polimeni come eCommerce Manager. Analisi tecnica, roadmap di crescita e demo interattiva.">
     <title>Assessment Strategico | Giovanni E. Polimeni</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -264,7 +266,7 @@
 
 <body class="antialiased selection:bg-blue-500/30">
 
-    <canvas id="wave-canvas"></canvas>
+    <canvas id="wave-canvas" aria-label="Sfondo animato con onde digitali" role="img"></canvas>
 
     <nav class="fixed top-0 w-full z-50 glass-nav">
         <div class="h-[2px] bg-white/5 w-full absolute top-0 left-0">
@@ -606,11 +608,11 @@
 
                         <div class="space-y-8">
                             <div>
-                                <h4 class="text-white font-bold mb-2 flex items-center gap-2">
+                                <h3 class="text-white font-bold mb-2 flex items-center gap-2">
                                     <span
                                         class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs">1</span>
                                     Master File & Normalizzazione
-                                </h4>
+                                </h3>
                                 <p class="text-sm text-slate-400">
                                     Creazione di un Master Excel strutturato. Definizione rigida delle colonne (SKU,
                                     Nome SEO, Attributi separati).
@@ -620,11 +622,11 @@
                             </div>
 
                             <div>
-                                <h4 class="text-white font-bold mb-2 flex items-center gap-2">
+                                <h3 class="text-white font-bold mb-2 flex items-center gap-2">
                                     <span
                                         class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs">2</span>
                                     Naming Convention & Mapping
-                                </h4>
+                                </h3>
                                 <p class="text-sm text-slate-400">
                                     Le immagini sono il punto critico. Rinominiamo i file seguendo la logica
                                     <code>SKU_materiale_spessore.jpg</code>.
@@ -757,7 +759,7 @@
                                 class="absolute -top-3 -right-3 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase shadow-lg shadow-blue-900/50">
                                 Jira Ticket
                             </div>
-                            <h4 class="text-white font-bold text-sm mb-3">Brief Tecnico per Developer</h4>
+                            <h3 class="text-white font-bold text-sm mb-3">Brief Tecnico per Developer</h3>
                             <div class="space-y-3 text-xs font-mono text-slate-300">
                                 <div>
                                     <strong class="text-slate-500">USER STORY:</strong><br>
@@ -786,6 +788,7 @@
                             class="glass-panel p-2 rounded-xl border border-white/10 relative h-64 bg-black flex items-center justify-center overflow-hidden group mb-6">
                             <img id="demo-image"
                                 src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1974&auto=format&fit=crop"
+                                alt="Esempio immagine non ottimizzata che causa LCP alto" width="1974" height="1316"
                                 class="opacity-40 blur-sm transition-all duration-1000 object-cover w-full h-full invert-0">
                             <div class="absolute top-4 right-4 bg-red-500/20 border border-red-500 text-red-500 px-3 py-1 rounded text-xs font-bold transition-all"
                                 id="lcp-badge">LCP: 4.2s</div>
@@ -831,11 +834,11 @@
 
                     <!-- A: VARIANTI -->
                     <div class="prose-text">
-                        <h4 class="text-white font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wider">
+                        <h3 class="text-white font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wider">
                             <span
                                 class="bg-blue-600 text-white w-6 h-6 rounded flex items-center justify-center text-xs font-bold">A</span>
                             Gestione Varianti & Scalabilità
-                        </h4>
+                        </h3>
                         <p class="text-sm">
                             <strong>Strategia "Single Master":</strong> Non creo 50 prodotti separati. Uso un unico ID
                             prodotto padre e gestisco le varianti come <em>attributi dinamici</em> combinati
@@ -851,11 +854,11 @@
 
                     <!-- B: STRATEGIA -->
                     <div class="prose-text">
-                        <h4 class="text-white font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wider">
+                        <h3 class="text-white font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wider">
                             <span
                                 class="bg-purple-600 text-white w-6 h-6 rounded flex items-center justify-center text-xs font-bold">B</span>
                             Ottimizzazione Flussi (No Design Touch)
-                        </h4>
+                        </h3>
                         <ul class="text-sm space-y-2">
                             <li><strong>1. Pre-Checkout Upsell:</strong> Intercetto il click su "Acquista". Se il
                                 carrello non contiene il kit di fissaggio, mostro un modal: <em>"Vuoi davvero la targa
@@ -977,7 +980,7 @@
                             <!-- Price & CTA -->
                             <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
                                 <div>
-                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Prezzo
+                                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Prezzo
                                         Stimato</div>
                                     <div class="text-3xl font-black text-slate-900 tracking-tighter" id="price-display">
                                         €85<span class="text-lg font-normal text-slate-500">.00</span></div>
@@ -1020,7 +1023,7 @@
                         <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-4">
                             <i data-lucide="brain" class="w-6 h-6 text-blue-400"></i>
                         </div>
-                        <h4 class="text-white font-bold mb-3">Penso come un Founder</h4>
+                        <h3 class="text-white font-bold mb-3">Penso come un Founder</h3>
                         <p class="text-sm text-slate-400 leading-relaxed">
                             Non mi limito a eseguire task. Mi chiedo: "Questa feature porta soldi? Questo bug quanto ci
                             costa in churn?".
@@ -1032,7 +1035,7 @@
                         <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center mb-4">
                             <i data-lucide="code-2" class="w-6 h-6 text-purple-400"></i>
                         </div>
-                        <h4 class="text-white font-bold mb-3">Conosco il Codice</h4>
+                        <h3 class="text-white font-bold mb-3">Conosco il Codice</h3>
                         <p class="text-sm text-slate-400 leading-relaxed">
                             Da full stack developer, non dipendo dai freelancer per capire "se è fattibile".
                             So già quanto costa implementare, quali sono i rischi, e come mitigarli.
@@ -1043,7 +1046,7 @@
                         <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mb-4">
                             <i data-lucide="trending-up" class="w-6 h-6 text-green-400"></i>
                         </div>
-                        <h4 class="text-white font-bold mb-3">Misuro Tutto</h4>
+                        <h3 class="text-white font-bold mb-3">Misuro Tutto</h3>
                         <p class="text-sm text-slate-400 leading-relaxed">
                             Ogni decisione è data-driven. Non "credo" che funzionerà — lo <strong
                                 class="text-white">valido con A/B test</strong>.
@@ -1059,8 +1062,8 @@
                             <i data-lucide="lightbulb" class="w-5 h-5 text-yellow-400"></i>
                         </div>
                         <div class="prose-text">
-                            <h4 class="text-white font-bold text-lg mb-2">La Differenza tra Me e un Candidato Standard
-                            </h4>
+                            <h3 class="text-white font-bold text-lg mb-2">La Differenza tra Me e un Candidato Standard
+                            </h3>
                             <p class="text-slate-300 text-sm">
                                 Un Website Manager classico gestisce il sito. <strong class="text-white">Io costruisco
                                     un'infrastruttura di crescita</strong>.
