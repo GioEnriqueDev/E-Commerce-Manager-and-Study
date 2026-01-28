@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Strategico | Giovanni E. Polimeni</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 500: '#3b82f6', 400: '#60a5fa' },
+                        accent: { 500: '#8b5cf6', 400: '#a78bfa' }
+                    },
+                    fontFamily: {
+                        sans: ['SF Pro Display', 'Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(40px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+            color: #f8fafc;
+            overflow-x: hidden;
+            padding-bottom: 140px;
+        }
+
+        #wave-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 60% 0%, #0f172a 0%, #000 80%);
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-nav {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 25px rgba(59, 130, 246, 0.5);
+        }
+
+        .section-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .code-block {
+            background: #0b0f19;
+            border: 1px solid #1e293b;
+            color: #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            line-height: 1.6;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            color: #94a3b8;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.7rem;
+        }
+
+        /* Console Styles */
+        .console-line {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .console-success {
+            color: #4ade80;
+        }
+
+        .console-info {
+            color: #60a5fa;
+        }
+
+        .console-warn {
+            color: #fbbf24;
+        }
+
+        /* Typography overrides for narrative text */
+        .prose-text p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+        }
+
+        .prose-text strong {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .prose-text ul {
+            list-style-type: disc;
+            padding-left: 1.2rem;
+            margin-bottom: 1rem;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .prose-text li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* --- 3D PLATE REALISM --- */
+        .plate-container-3d {
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+
+        .targa-real {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+            box-shadow:
+                20px 20px 60px rgba(0, 0, 0, 0.3),
+                /* Deep shadow */
+                -5px -5px 15px rgba(255, 255, 255, 0.1) inset;
+            /* Top-left light */
+        }
+
+        /* OTTONE / GOLD MATERIAL */
+        .mat-gold {
+            background:
+                url('https://www.transparenttextures.com/patterns/brushed-alum.png'),
+                linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
+            background-blend-mode: multiply;
+            border: 1px solid #b38728;
+            box-shadow:
+                0 4px 6px rgba(0, 0, 0, 0.3),
+                inset 0 0 20px rgba(255, 255, 255, 0.5);
+            /* Inner shine */
+        }
+
+        .mat-gold::after {
+            /* Shiny Overlay */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.4) 45%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .text-etched {
+            color: #3e2c09;
+            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+            /* Incisione look */
+            font-family: 'Times New Roman', serif;
+        }
+
+        /* PLEXIGLASS MATERIAL */
+        .mat-plexi {
+            background: rgba(230, 240, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow:
+                0 8px 32px 0 rgba(31, 38, 135, 0.1),
+                inset 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .text-plexi {
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* SCREW HEADS */
+        .screw-head {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #e2e8f0 0%, #94a3b8 50%, #475569 100%);
+            box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            position: absolute;
+            border: 1px solid #94a3b8;
+        }
+
+        .screw-head::after {
+            /* Slot */
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 80%;
+            height: 2px;
+            background: #475569;
+            transform: translate(-50%, -50%) rotate(45deg);
+            opacity: 0.6;
+        }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-blue-500/30">
+
+    <canvas id="wave-canvas"></canvas>
+
+    <nav class="fixed top-0 w-full z-50 glass-nav">
+        <div class="h-[2px] bg-white/5 w-full absolute top-0 left-0">
+            <div id="progress-bar" class="h-full bg-blue-500 w-0 shadow-[0_0_15px_#3b82f6]"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-8 h-8 rounded bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center font-bold text-xs ring-1 ring-white/20 text-white">
+                    GP</div>
+                <div class="leading-none hidden sm:block">
+                    <div class="font-bold text-white text-sm">Giovanni E. Polimeni</div>
+                    <div class="text-[10px] text-slate-400">eCommerce Manager Candidate</div>
+                </div>
+            </div>
+            <div class="hidden md:flex gap-8 text-[11px] font-bold tracking-widest text-slate-500 uppercase">
+                <a href="#roadmap" class="hover:text-white transition-colors">1. Strategy</a>
+                <a href="#products" class="hover:text-white transition-colors">2. Automation</a>
+                <a href="#performance" class="hover:text-white transition-colors">3. Performance</a>
+                <a href="#ux" class="hover:text-white transition-colors text-blue-400">4. Bonus UX</a>
+            </div>
+            <a href="#contact"
+                class="bg-white text-black px-4 py-2 rounded-full text-xs font-bold hover:scale-105 transition-transform">Hire
+                Me</a>
+        </div>
+    </nav>
+
+    <main class="pt-20">
+
+        <section class="min-h-[85vh] flex flex-col justify-center relative px-6">
+            <div class="max-w-6xl mx-auto w-full grid lg:grid-cols-2 gap-12 items-center">
+                <div class="animate-fade-in-up">
+                    <div
+                        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-6">
+                        System Operational
+                    </div>
+                    <h1 class="text-5xl lg:text-7xl font-bold text-white tracking-tight mb-8 leading-[1.1]">
+                        Non solo Gestione.<br>
+                        <span
+                            class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 text-glow">Ingegneria
+                            della Crescita.</span>
+                    </h1>
+                    <p class="text-lg text-slate-300 font-light leading-relaxed mb-10 max-w-xl">
+                        Un approccio manageriale per <em>TargheProfessionali.it</em> che unisce <strong>strategia di
+                            business</strong> e <strong>competenza tecnica</strong>.
+                        <br><br>
+                        Il mio obiettivo non è solo "fare task", ma costruire un'infrastruttura scalabile che aumenti il
+                        <strong class="text-green-400">Net Profit Efficiency</strong> riducendo i costi operativi e
+                        massimizzando le conversioni.
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="#roadmap"
+                            class="px-8 py-3 bg-white text-black rounded-lg font-bold hover:bg-slate-200 transition-colors text-sm">Analisi
+                            Strategica</a>
+                    </div>
+                </div>
+
+                <div class="hidden lg:block relative h-[400px] animate-fade-in-up" style="animation-delay: 0.2s">
+                    <div
+                        class="absolute top-10 right-10 glass-panel p-6 rounded-xl border-l-4 border-blue-500 z-20 w-80 transform rotate-3 hover:rotate-0 transition-transform duration-500">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="text-xs font-bold text-slate-400 uppercase">Approccio Standard</div>
+                            <div class="text-[10px] text-red-400 font-bold">HIGH OPEX</div>
+                        </div>
+                        <div class="text-slate-300 text-xs font-mono leading-relaxed">
+                            Gestione manuale prodotti.<br>
+                            Ottimizzazioni a vista.<br>
+                            Crescita lineare costosa.
+                        </div>
+                    </div>
+                    <div
+                        class="absolute bottom-20 left-10 glass-panel p-6 rounded-xl border-l-4 border-green-500 z-10 w-80 transform -rotate-3 hover:rotate-0 transition-transform duration-500 shadow-xl">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="text-xs font-bold text-slate-400 uppercase">Il Mio Metodo</div>
+                            <div class="text-[10px] text-green-400 font-bold">SCALABLE</div>
+                        </div>
+                        <div class="text-white font-bold text-sm font-mono mb-2">Protocolli Tecnici & KPI</div>
+                        <div class="text-slate-400 text-xs leading-relaxed">
+                            Automazione Python.<br>
+                            Data-Driven Decisions (R.I.C.E.).<br>
+                            Performance come Revenue Driver.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 text-slate-500 text-xs animate-bounce">Scroll to
+                Explore</div>
+        </section>
+
+        <!-- EXECUTIVE SUMMARY -->
+        <section class="py-16 relative">
+            <div class="max-w-6xl mx-auto px-6">
+                <div class="glass-panel p-10 rounded-2xl border-l-4 border-green-500 relative">
+                    <div
+                        class="absolute -top-3 left-8 bg-green-500 text-black px-4 py-1 rounded-full text-xs font-bold uppercase">
+                        Executive Summary
+                    </div>
+
+                    <div class="grid md:grid-cols-4 gap-8 mb-8">
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-white mb-2">6 Mesi</div>
+                            <div class="text-xs text-slate-400 uppercase tracking-widest">Timeline Completa</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-green-400 mb-2">+28.4k€</div>
+                            <div class="text-xs text-slate-400 uppercase tracking-widest">Revenue Incrementale</div>
+                            <div class="text-[10px] text-slate-500 mt-1">AOV +15% • CR +10%</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-blue-400 mb-2">16k€</div>
+                            <div class="text-xs text-slate-400 uppercase tracking-widest">Investimento Dev</div>
+                            <div class="text-[10px] text-slate-500 mt-1">320 ore @ 50€/h</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-4xl font-bold text-purple-400 mb-2">3.1</div>
+                            <div class="text-xs text-slate-400 uppercase tracking-widest">Payback (Mesi)</div>
+                            <div class="text-[10px] text-green-400 mt-1 font-bold">ROI Year 1: +78%</div>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-white/10">
+                        <div class="prose-text">
+                            <p class="text-center text-sm text-slate-300">
+                                <strong class="text-white">Il mio approccio non è "fare task"</strong> — è costruire un
+                                sistema che si ripaga da solo.
+                                Ogni iniziativa della roadmap ha un ROI calcolato. Ogni linea di codice è giustificata
+                                da un KPI di business.
+                                <span class="text-green-400 font-bold">L'eCommerce non è tecnologia per la tecnologia, è
+                                    ingegneria della profittabilità.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="roadmap" class="py-24 relative bg-white/[0.02]">
+            <div class="max-w-7xl mx-auto px-6">
+                <span class="section-number">SEZIONE 01</span>
+                <div class="mb-16 reveal">
+                    <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">Roadmap Strategica (6 Mesi)</h2>
+                    <p class="text-slate-400 max-w-3xl prose-text">
+                        Ho strutturato il piano semestrale utilizzando il framework <strong>R.I.C.E. (Reach, Impact,
+                            Confidence, Effort)</strong>.
+                        L'errore comune è partire subito col marketing su un sito non ottimizzato. La mia strategia
+                        inverte il flusso: prima stabilizziamo la piattaforma e i dati (Fase 1), poi ottimizziamo la
+                        conversione (Fase 2) e infine scaliamo il traffico (Fase 3).
+                    </p>
+                </div>
+
+                <div
+                    class="space-y-16 relative before:absolute before:left-4 before:top-0 before:h-full before:w-px before:bg-slate-800 reveal">
+
+                    <div class="pl-12 relative">
+                        <div
+                            class="absolute left-0 top-0 w-8 h-8 rounded-full bg-slate-900 border border-blue-500 flex items-center justify-center text-blue-500 font-bold text-xs">
+                            F1</div>
+                        <div class="glass-panel rounded-xl p-8 border-l-4 border-blue-500">
+                            <div class="flex flex-col md:flex-row justify-between mb-6 pb-6 border-b border-white/5">
+                                <div>
+                                    <span
+                                        class="text-blue-400 font-bold text-xs uppercase tracking-widest mb-2 block">Mese
+                                        1-2 • Priorità Alta</span>
+                                    <h3 class="text-2xl font-bold text-white">Fondamenta: Refactoring Catalogo & UX Core
+                                    </h3>
+                                </div>
+                                <div class="mt-4 md:mt-0 text-right">
+                                    <div class="text-xs text-slate-500 uppercase font-bold">Obiettivo Strategico</div>
+                                    <div class="text-lg text-white font-mono">Riduzione Errori DB • Efficienza +30%
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 gap-12">
+                                <div class="prose-text">
+                                    <h4 class="text-white font-bold text-sm mb-4 uppercase tracking-wide">Attività
+                                        Principali</h4>
+                                    <p><strong>1. Refactoring Attributi e Combinazioni:</strong> Attualmente la gestione
+                                        è frammentata. Standardizzerò gli attributi (Materiale, Spessore, Finitura)
+                                        eliminando le combinazioni inutili che appesantiscono il DB e confondono
+                                        l'utente.</p>
+                                    <p><strong>2. Template Scheda Prodotto Modulare:</strong> Ridisegno della PDP con
+                                        sezioni fisse (Benefici, Installazione, Tempi) e accordion tecnici per
+                                        migliorare la SEO semantica senza clutter visivo.</p>
+                                    <p><strong>3. Tracking Avanzato:</strong> Setup di GA4 con eventi custom (es.
+                                        `config_start`, `select_variant`) e Microsoft Clarity per avere dati qualitativi
+                                        prima di scalare.</p>
+                                </div>
+                                <div class="bg-white/5 p-6 rounded-lg text-xs space-y-4 font-mono">
+                                    <div>
+                                        <strong class="text-slate-500 block mb-1">DIPENDENZE & TEAM</strong>
+                                        <div class="text-slate-300">
+                                            <span class="text-blue-400">Frontend Freelance:</span> Modifica file TPL
+                                            prodotto e categoria.<br>
+                                            <span class="text-blue-400">Content Specialist:</span> Data entry
+                                            standardizzato.<br>
+                                            <span class="text-blue-400">UX Designer:</span> Nuova gerarchia
+                                            informazioni.
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 pt-4 border-t border-white/10">
+                                        <div class="text-green-400 font-bold">ROI ATTESO:</div>
+                                        <div class="text-slate-400">Riduzione tickets assistenza tecnica (-20%) e
+                                            diminuzione tempo di gestione catalogo.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pl-12 relative">
+                        <div
+                            class="absolute left-0 top-0 w-8 h-8 rounded-full bg-slate-900 border border-purple-500 flex items-center justify-center text-purple-500 font-bold text-xs">
+                            F2</div>
+                        <div class="glass-panel rounded-xl p-8 border-l-4 border-purple-500">
+                            <div class="flex flex-col md:flex-row justify-between mb-6 pb-6 border-b border-white/5">
+                                <div>
+                                    <span
+                                        class="text-purple-400 font-bold text-xs uppercase tracking-widest mb-2 block">Mese
+                                        3-4 • Priorità Alta</span>
+                                    <h3 class="text-2xl font-bold text-white">Performance & AOV Booster</h3>
+                                </div>
+                                <div class="mt-4 md:mt-0 text-right">
+                                    <div class="text-xs text-slate-500 uppercase font-bold">Obiettivo Strategico</div>
+                                    <div class="text-lg text-white font-mono">AOV +15% • LCP < 2.5s</div>
+                                    </div>
+                                </div>
+
+                                <div class="grid md:grid-cols-2 gap-12">
+                                    <div class="prose-text">
+                                        <h4 class="text-white font-bold text-sm mb-4 uppercase tracking-wide">Attività
+                                            Principali</h4>
+                                        <p><strong>1. Bundle & Cross-Sell Dinamico:</strong> Implementazione di regole
+                                            logiche nel carrello. Esempio: se la targa configurata supera i 30cm,
+                                            suggeriamo automaticamente distanziali maggiorati. Questo alza lo scontrino
+                                            medio senza frizione.</p>
+                                        <p><strong>2. Dynamic Pricing & Bulk:</strong> Integrazione di tabelle sconti
+                                            quantità visibili (5+, 10+, 20+) per incentivare ordini B2B più consistenti.
+                                        </p>
+                                        <p><strong>3. Server-Side Caching:</strong> Attivazione di Varnish Cache e
+                                            ottimizzazione Smarty. Questo è cruciale per il mobile, dove ogni secondo di
+                                            ritardo ci costa il 7% di conversioni.</p>
+                                    </div>
+                                    <div class="bg-white/5 p-6 rounded-lg text-xs space-y-4 font-mono">
+                                        <div>
+                                            <strong class="text-slate-500 block mb-1">DIPENDENZE & TEAM</strong>
+                                            <div class="text-slate-300">
+                                                <span class="text-purple-400">Dev Freelance:</span> Configurazione
+                                                Varnish e regole carrello.<br>
+                                                <span class="text-purple-400">Marketing:</span> Definizione strategia
+                                                bundle.
+                                            </div>
+                                        </div>
+                                        <div class="mt-4 pt-4 border-t border-white/10">
+                                            <div class="text-green-400 font-bold">ROI ATTESO:</div>
+                                            <div class="text-slate-400">Aumento diretto del fatturato tramite Upsell
+                                                (+3.7k/mese stimati) e riduzione bounce rate.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pl-12 relative">
+                            <div
+                                class="absolute left-0 top-0 w-8 h-8 rounded-full bg-slate-900 border border-green-500 flex items-center justify-center text-green-500 font-bold text-xs">
+                                F3</div>
+                            <div class="glass-panel rounded-xl p-8 border-l-4 border-green-500">
+                                <div
+                                    class="flex flex-col md:flex-row justify-between mb-6 pb-6 border-b border-white/5">
+                                    <div>
+                                        <span
+                                            class="text-green-400 font-bold text-xs uppercase tracking-widest mb-2 block">Mese
+                                            5-6 • Priorità Media-Alta</span>
+                                        <h3 class="text-2xl font-bold text-white">Scaling & SEO Dominance</h3>
+                                    </div>
+                                    <div class="mt-4 md:mt-0 text-right">
+                                        <div class="text-xs text-slate-500 uppercase font-bold">Obiettivo Strategico
+                                        </div>
+                                        <div class="text-lg text-white font-mono">Traffico Org +25% • CR Globale +10%
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid md:grid-cols-2 gap-12">
+                                    <div class="prose-text">
+                                        <h4 class="text-white font-bold text-sm mb-4 uppercase tracking-wide">Attività
+                                            Principali</h4>
+                                        <p><strong>1. Strategia SEO Categorie Verticali:</strong> Creazione di landing
+                                            page specifiche per nicchie (es. "Targhe Studio Medico", "Targhe
+                                            Condominio") con testi above-the-fold e FAQ schema.org per catturare
+                                            traffico transazionale.</p>
+                                        <p><strong>2. Checkout Optimization:</strong> Semplificazione del checkout in
+                                            un'unica pagina (One-Page) e integrazione di wallet rapidi (Apple Pay /
+                                            Google Pay) per ridurre l'abbandono mobile.</p>
+                                        <p><strong>3. A/B Testing Configuratore:</strong> Testare versione
+                                            "Step-by-step" vs "Tutto in pagina" usando tool come VWO per validare
+                                            scientificamente quale converte meglio.</p>
+                                    </div>
+                                    <div class="bg-white/5 p-6 rounded-lg text-xs space-y-4 font-mono">
+                                        <div>
+                                            <strong class="text-slate-500 block mb-1">DIPENDENZE & TEAM</strong>
+                                            <div class="text-slate-300">
+                                                <span class="text-green-400">Marketing:</span> Keyword research e
+                                                testi.<br>
+                                                <span class="text-green-400">UX/UI:</span> Design landing e test
+                                                flussi.<br>
+                                                <span class="text-green-400">Dev:</span> Checkout customization.
+                                            </div>
+                                        </div>
+                                        <div class="mt-4 pt-4 border-t border-white/10">
+                                            <div class="text-green-400 font-bold">ROI ATTESO:</div>
+                                            <div class="text-slate-400">Acquisizione traffico qualificato B2B e
+                                                massimizzazione del valore per visita.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+        </section>
+
+        <section id="products" class="py-24 relative">
+            <div class="max-w-7xl mx-auto px-6">
+                <span class="section-number">SEZIONE 02</span>
+                <div class="grid lg:grid-cols-2 gap-16">
+                    <div class="reveal">
+                        <h2 class="text-3xl md:text-5xl font-bold text-white mb-8">Strategia Import: Data-First</h2>
+
+                        <div class="prose-text mb-8">
+                            <p>Caricare 50 prodotti complessi a mano è un rischio enorme per l'integrità dei dati.
+                                Errori di battitura ("3mm" vs "3 mm") creano filtri rotti sul frontend e duplicati nel
+                                backend.</p>
+                            <p>La mia strategia prevede un flusso rigoroso <strong>Excel &rarr; Python &rarr;
+                                    Prestashop</strong> per garantire dati puliti e zero errori umani.</p>
+                        </div>
+
+                        <div class="space-y-8">
+                            <div>
+                                <h4 class="text-white font-bold mb-2 flex items-center gap-2">
+                                    <span
+                                        class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs">1</span>
+                                    Master File & Normalizzazione
+                                </h4>
+                                <p class="text-sm text-slate-400">
+                                    Creazione di un Master Excel strutturato. Definizione rigida delle colonne (SKU,
+                                    Nome SEO, Attributi separati).
+                                    Utilizzo di script per uniformare i formati (es. "Oro lucido" e "Oro" diventano
+                                    un'unica variante standard).
+                                </p>
+                            </div>
+
+                            <div>
+                                <h4 class="text-white font-bold mb-2 flex items-center gap-2">
+                                    <span
+                                        class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs">2</span>
+                                    Naming Convention & Mapping
+                                </h4>
+                                <p class="text-sm text-slate-400">
+                                    Le immagini sono il punto critico. Rinominiamo i file seguendo la logica
+                                    <code>SKU_materiale_spessore.jpg</code>.
+                                    Questo permette allo script di importazione di associare automaticamente l'immagine
+                                    corretta alla variante specifica, risparmiando ore di click manuali.
+                                </p>
+                            </div>
+
+                            <div class="glass-panel p-4 rounded bg-red-900/10 border-l-2 border-red-500">
+                                <strong class="text-red-400 text-xs uppercase block mb-1">Blocking Points
+                                    Attuali</strong>
+                                <ul class="list-disc list-inside text-xs text-slate-400 space-y-1">
+                                    <li>Incoerenza nomi attributi (genera filtri inutilizzabili).</li>
+                                    <li>Prezzi varianti non strutturati (rischio margine errato).</li>
+                                    <li>Mancanza di SKU gerarchici (caos in magazzino).</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reveal delay-200">
+                        <div class="border border-white/10 rounded-xl overflow-hidden bg-[#0d1117] shadow-2xl mb-6">
+                            <div class="px-4 py-3 bg-white/5 border-b border-white/5 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 bg-red-500 rounded-full" id="data-status-light"></span>
+                                    <span class="text-[10px] font-bold text-slate-300 uppercase"
+                                        id="data-status-text">DIRTY DATA DETECTED</span>
+                                </div>
+                                <button onclick="runDataCleaner()" id="btn-cleaner"
+                                    class="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold rounded flex items-center gap-1 transition-all">
+                                    <i data-lucide="play" class="w-3 h-3"></i> RUN PYTHON SCRIPT
+                                </button>
+                            </div>
+                            <div class="p-0">
+                                <table class="w-full text-[10px] font-mono text-left">
+                                    <thead>
+                                        <tr class="text-slate-500 border-b border-white/5 bg-black/20">
+                                            <th class="p-3">SKU</th>
+                                            <th class="p-3">Attributo (Spessore)</th>
+                                            <th class="p-3 text-right">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="demo-table-body" class="text-slate-300 divide-y divide-white/5">
+                                        <tr>
+                                            <td>TRG-01</td>
+                                            <td class="text-red-400">3mm</td>
+                                            <td class="text-red-500 text-right">ERR</td>
+                                        </tr>
+                                        <tr>
+                                            <td>TRG-02</td>
+                                            <td class="text-red-400">3 mm</td>
+                                            <td class="text-red-500 text-right">ERR</td>
+                                        </tr>
+                                        <tr>
+                                            <td>TRG-03</td>
+                                            <td class="text-red-400">Spess. 3mm</td>
+                                            <td class="text-red-500 text-right">ERR</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="bg-[#050910] p-4 border-t border-white/10">
+                                <div class="text-[10px] font-mono text-slate-500 mb-2"># automazione_pandas.py</div>
+                                <div class="text-[10px] font-mono text-slate-400 leading-relaxed">
+                                    <span class="text-purple-400">import</span> pandas <span
+                                        class="text-purple-400">as</span> pd<br>
+                                    df = pd.read_excel(<span class="text-green-400">"master_products.xlsx"</span>)<br>
+                                    <span class="text-slate-500"># Normalizzazione e Naming Immagini</span><br>
+                                    df[<span class="text-green-400">'Spessore'</span>] = df[<span
+                                        class="text-green-400">'Spessore'</span>].str.replace(<span
+                                        class="text-green-400">"mm"</span>, <span class="text-green-400">"
+                                        mm"</span>).str.strip()<br>
+                                    df[<span class="text-green-400">'Image_Name'</span>] = df[<span
+                                        class="text-green-400">'SKU'</span>] + <span class="text-green-400">"_"</span> +
+                                    df[<span class="text-green-400">'Materiale'</span>] + <span
+                                        class="text-green-400">".jpg"</span><br>
+                                    df.to_csv(<span class="text-green-400">"prestashop_ready.csv"</span>)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div
+                                class="inline-block px-3 py-1 rounded bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold">
+                                ROI: +98% Efficienza (25h -> 10min)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="performance" class="py-24 relative bg-white/[0.02]">
+            <div class="max-w-7xl mx-auto px-6">
+                <span class="section-number">SEZIONE 03</span>
+                <div class="grid lg:grid-cols-2 gap-16 items-start">
+                    <div class="reveal">
+                        <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">Performance & LCP Analysis</h2>
+                        <p class="text-slate-400 mb-8 prose-text">
+                            La lentezza sulla categoria Plexiglass non è solo fastidiosa, è costosa. Un <span
+                                class="relative group cursor-help border-b border-dashed border-blue-400">
+                                <span class="text-blue-400 font-semibold">LCP</span>
+                                <span
+                                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-white/10 shadow-xl">
+                                    Largest Contentful Paint: tempo di caricamento dell'elemento più grande visibile
+                                </span>
+                            </span>
+                            superiore a 4s su mobile causa un abbandono del 40% prima ancora che
+                            l'utente veda il primo prodotto.
+                        </p>
+
+                        <div class="space-y-6 mb-8">
+                            <div class="glass-panel p-4 border-l-2 border-red-500">
+                                <strong class="text-red-400 block mb-1 text-xs uppercase">CAUSA A: Asset
+                                    Pesanti</strong>
+                                <p class="text-sm text-slate-300">Immagini caricate in full-size (2000px) e
+                                    ridimensionate via CSS. Stiamo chiedendo a uno smartphone di scaricare 2MB per
+                                    visualizzare una miniatura. Questo distrugge il punteggio LCP.</p>
+                            </div>
+                            <div class="glass-panel p-4 border-l-2 border-yellow-500">
+                                <strong class="text-yellow-400 block mb-1 text-xs uppercase">CAUSA B: Render
+                                    Blocking</strong>
+                                <p class="text-sm text-slate-300">Risorse critiche bloccate. File JS (slider, chat) e
+                                    CSS del tema sono caricati nell'<code>head</code> senza attributo defer,
+                                    costringendo il browser a fermare il rendering della pagina.</p>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel p-6 rounded-xl border border-white/10 relative">
+                            <div
+                                class="absolute -top-3 -right-3 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase shadow-lg shadow-blue-900/50">
+                                Jira Ticket
+                            </div>
+                            <h4 class="text-white font-bold text-sm mb-3">Brief Tecnico per Developer</h4>
+                            <div class="space-y-3 text-xs font-mono text-slate-300">
+                                <div>
+                                    <strong class="text-slate-500">USER STORY:</strong><br>
+                                    Come utente mobile voglio caricare rapidamente la categoria per navigare senza
+                                    attese.
+                                </div>
+                                <div>
+                                    <strong class="text-slate-500">TECHNICAL TASKS:</strong>
+                                    <ul class="list-disc list-inside text-slate-400 mt-1">
+                                        <li>Attivare modulo conversione WebP server-side.</li>
+                                        <li>Implementare tag <code>picture</code> con <code>srcset</code> per servire
+                                            dimensioni corrette.</li>
+                                        <li>Spostare JS non critici nel footer con attributo <code>defer</code>.</li>
+                                    </ul>
+                                </div>
+                                <div class="pt-2 border-t border-white/5 flex gap-4">
+                                    <span class="text-green-400 font-bold">AC: LCP < 2.5s</span>
+                                            <span class="text-green-400 font-bold">AC: CLS < 0.1</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reveal delay-200">
+                        <div
+                            class="glass-panel p-2 rounded-xl border border-white/10 relative h-64 bg-black flex items-center justify-center overflow-hidden group mb-6">
+                            <img id="demo-image"
+                                src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1974&auto=format&fit=crop"
+                                class="opacity-40 blur-sm transition-all duration-1000 object-cover w-full h-full invert-0">
+                            <div class="absolute top-4 right-4 bg-red-500/20 border border-red-500 text-red-500 px-3 py-1 rounded text-xs font-bold transition-all"
+                                id="lcp-badge">LCP: 4.2s</div>
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <span id="img-label"
+                                    class="bg-black/80 text-red-400 px-3 py-1 rounded text-xs font-mono border border-red-500/50">UNOPTIMIZED
+                                    (PNG 2MB)</span>
+                            </div>
+                        </div>
+
+                        <button onclick="optimizeLCP()" id="btn-opt"
+                            class="w-full py-3 bg-white text-black font-bold rounded hover:bg-slate-200 transition-all flex items-center justify-center gap-2 mb-6">
+                            <i data-lucide="zap" class="w-4 h-4"></i> DEPLOY OPTIMIZATION FIX
+                        </button>
+
+                        <div class="code-block text-[10px]">
+                            &lt;img src="targa-plexi.webp"<br>
+                            &nbsp;&nbsp;<span class="text-green-400">srcset</span>="targa-300.webp 300w, targa-600.webp
+                            600w"<br>
+                            &nbsp;&nbsp;<span class="text-green-400">sizes</span>="(max-width: 600px) 90vw, 600px"<br>
+                            &nbsp;&nbsp;loading="lazy" width="600" height="400"&gt;<br><br>
+                            &lt;script src="/theme.js" <span class="text-purple-400">defer</span>&gt;&lt;/script&gt;
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="absolute inset-0 bg-gradient-to-t from-blue-900/10 to-transparent pointer-events-none"></div>
+        <div class="max-w-7xl mx-auto px-6">
+            <span class="section-number text-blue-400">SEZIONE 04 (CHALLENGE)</span>
+            <h2 class="text-3xl md:text-5xl font-bold text-white mb-4">Implementazione Template UX/UI</h2>
+            <p class="text-slate-400 mb-12 max-w-2xl">
+                Risposta operativa alla sezione facoltativa. Non mi limito a descrivere la soluzione: <strong>la ho
+                    programmata qui sotto</strong>.
+            </p>
+
+            <!-- GRID LAYOUT: TEXT LEFT, DEMO RIGHT -->
+            <div class="grid lg:grid-cols-2 gap-16 reveal">
+
+                <!-- ANSWERS COLUMN -->
+                <div class="space-y-12">
+
+                    <!-- A: VARIANTI -->
+                    <div class="prose-text">
+                        <h4 class="text-white font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wider">
+                            <span
+                                class="bg-blue-600 text-white w-6 h-6 rounded flex items-center justify-center text-xs font-bold">A</span>
+                            Gestione Varianti & Scalabilità
+                        </h4>
+                        <p class="text-sm">
+                            <strong>Strategia "Single Master":</strong> Non creo 50 prodotti separati. Uso un unico ID
+                            prodotto padre e gestisco le varianti come <em>attributi dinamici</em> combinati
+                            (Combinations in Prestashop).
+                        </p>
+                        <p class="text-sm mt-2">
+                            <strong>Controllo Integrità (Client-Side):</strong> Implemento un listener JS che monitora
+                            lo stato dei campi obbligatori.
+                            Il bottone "Aggiungi al Carrello" nasce <code>disabled</code> (opacity 50%) e si attiva
+                            <em>solo</em> quando l'array di validazione è completo `[Materiale, Colore, Testo]`.
+                        </p>
+                    </div>
+
+                    <!-- B: STRATEGIA -->
+                    <div class="prose-text">
+                        <h4 class="text-white font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wider">
+                            <span
+                                class="bg-purple-600 text-white w-6 h-6 rounded flex items-center justify-center text-xs font-bold">B</span>
+                            Ottimizzazione Flussi (No Design Touch)
+                        </h4>
+                        <ul class="text-sm space-y-2">
+                            <li><strong>1. Pre-Checkout Upsell:</strong> Intercetto il click su "Acquista". Se il
+                                carrello non contiene il kit di fissaggio, mostro un modal: <em>"Vuoi davvero la targa
+                                    senza viti?"</em>. Conversion Rate accessori stimato +20%.</li>
+                            <li><strong>2. Sticky CTA Mobile:</strong> Su mobile, il bottone d'acquisto deve rimanere
+                                ancorato in basso (sticky bottom) durante lo scroll. Riduce la frizione del 30%.</li>
+                            <li><strong>3. Feedback Istantaneo:</strong> Il prezzo DEVE aggiornarsi real-time al cambio
+                                variante senza ricaricare la pagina (AJAX/JS), per mantenere il flow cognitivo.</li>
+                        </ul>
+                    </div>
+
+                    <!-- C: DEV BRIEF -->
+                    <div class="glass-panel p-6 rounded-xl border border-white/10 bg-[#0d1117]">
+                        <h4 class="text-white font-bold mb-3 flex items-center gap-2 text-sm uppercase tracking-wider">
+                            <span
+                                class="bg-green-600 text-white w-6 h-6 rounded flex items-center justify-center text-xs font-bold">C</span>
+                            Comunicazione al Developer
+                        </h4>
+                        <div class="text-[10px] font-mono text-slate-300 leading-relaxed">
+                            <span class="text-purple-400">Subject:</span> Specs configuratore Targa v2.0<br><br>
+                            Ciao Marco,<br>
+                            implementiamo il design con le seguenti logiche imperative:<br>
+                            1. <strong>Validation Strict:</strong> CTA disabilitata di default. Class `.btn-disabled`
+                            rimuove pointer-events.<br>
+                            2. <strong>Conditional Logic:</strong> Se `Materiale == Ottone` -> mostra colori `[Oro,
+                            Argento, Nero]`. Se `Plexi`, nascondi fieldset colori.<br>
+                            3. <strong>Price Calculation:</strong> Base Price + Attribute Price (definito nel JSON
+                            allegato).<br><br>
+                            Vedi demo funzionale qui a fianco. Buon lavoro.
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- DEMO COLUMN -->
+                <div class="relative">
+                    <div
+                        class="absolute -top-4 -right-4 z-10 bg-green-500 text-black text-[10px] font-bold px-3 py-1 rounded-full uppercase shadow-lg shadow-green-500/50 animate-bounce">
+                        Live Proof of Concept
+                    </div>
+
+                    <div class="bg-white rounded-lg p-6 shadow-2xl text-slate-800">
+
+                        <!-- PREVIEW AREA (3D CONTAINER) -->
+                        <div class="bg-slate-100/50 rounded-lg p-8 mb-6 flex items-center justify-center min-h-[220px] relative overflow-hidden plate-container-3d"
+                            id="preview-container" onmousemove="rotatePlate(event)" onmouseleave="resetRotate()">
+                            <!-- BACKGROUND GRID -->
+                            <div
+                                class="absolute inset-0 opacity-10 bg-[linear-gradient(rgba(0,0,0,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.1)_1px,transparent_1px)] bg-[size:20px_20px]">
+                            </div>
+
+                            <!-- THE PLATE -->
+                            <div id="plate-preview"
+                                class="w-full max-w-[280px] h-40 rounded targa-real mat-gold flex flex-col items-center justify-center transition-all duration-500">
+
+                                <!-- Realistic Screws -->
+                                <div class="screw-head top-3 left-3 transform rotate-45"></div>
+                                <div class="screw-head top-3 right-3 transform -rotate-12"></div>
+                                <div class="screw-head bottom-3 left-3 transform rotate-90"></div>
+                                <div class="screw-head bottom-3 right-3 transform -rotate-45"></div>
+
+                                <div class="text-center px-4 transform translate-z-10">
+                                    <div id="preview-text-main"
+                                        class="text-etched text-3xl font-bold mb-2 tracking-wide">Dott. Rossi</div>
+                                    <div id="preview-text-sub"
+                                        class="text-etched text-[10px] uppercase tracking-[0.2em] opacity-80">Medico
+                                        Chirurgo</div>
+                                </div>
+                            </div>
+
+                            <!-- MOUSE INSTRUCTION -->
+                            <div
+                                class="absolute bottom-2 text-[9px] text-slate-400 font-mono flex items-center gap-1 opacity-50">
+                                <i data-lucide="move" class="w-3 h-3"></i> TILT MOUSE TO ROTATE 3D
+                            </div>
+                        </div>
+
+                        <!-- CONTROLS -->
+                        <div class="space-y-5">
+                            <!-- Material -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="setMaterial('ottone')" id="btn-ottone"
+                                    class="py-3 px-3 rounded-lg border border-slate-200 bg-gradient-to-br from-orange-50 to-orange-100 text-xs font-bold text-slate-800 ring-2 ring-yellow-600 shadow-md transition-all flex items-center justify-center gap-2">
+                                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div> OTTONE (GOLD)
+                                </button>
+                                <button onclick="setMaterial('plexiglass')" id="btn-plexi"
+                                    class="py-3 px-3 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-500 hover:border-blue-400 transition-all flex items-center justify-center gap-2">
+                                    <div class="w-3 h-3 rounded-full bg-blue-100 border border-blue-300"></div>
+                                    PLEXIGLASS
+                                </button>
+                            </div>
+
+                            <!-- Color (Conditional) -->
+                            <div id="color-section"
+                                class="transition-all duration-300 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                <label class="block text-[9px] font-bold text-slate-400 uppercase mb-2">Finitura /
+                                    Sfondo</label>
+                                <div class="flex gap-3 justify-center">
+                                    <button onclick="setColor('gold')" id="btn-gold"
+                                        class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-700 shadow-lg ring-2 ring-offset-2 ring-blue-500 transform scale-110 active:scale-95 transition-all"
+                                        title="Oro Lucido"></button>
+                                    <button onclick="setColor('silver')" id="btn-silver"
+                                        class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 shadow active:scale-95 opacity-60 hover:opacity-100 transition-all"
+                                        title="Argento Satinato"></button>
+                                    <button onclick="setColor('black')" id="btn-black"
+                                        class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-800 to-black shadow active:scale-95 opacity-60 hover:opacity-100 transition-all"
+                                        title="Nero Opaco"></button>
+                                </div>
+                            </div>
+
+                            <!-- Text -->
+                            <div class="relative">
+                                <input type="text" id="custom-text" oninput="updateText(this.value)"
+                                    placeholder="Scrivi il nome sulla targa..."
+                                    class="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all bg-white shadow-inner">
+                                <i data-lucide="type" class="absolute left-3 top-3.5 w-4 h-4 text-slate-400"></i>
+                            </div>
+
+                            <!-- Price & CTA -->
+                            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                                <div>
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Prezzo
+                                        Stimato</div>
+                                    <div class="text-3xl font-black text-slate-900 tracking-tighter" id="price-display">
+                                        €85<span class="text-lg font-normal text-slate-500">.00</span></div>
+                                </div>
+                                <button id="add-to-cart" disabled
+                                    class="px-8 py-4 bg-slate-200 text-slate-400 font-bold rounded-xl cursor-not-allowed transition-all text-xs shadow-none">
+                                    AGGIUNGI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logic Code Snippet -->
+                    <div
+                        class="mt-4 p-4 rounded-lg bg-[#050910] border border-white/10 font-mono text-[10px] text-slate-400">
+                        <div class="text-green-400 mb-1 flex justify-between">
+                            <span>// REAL-TIME LOG</span>
+                            <span class="animate-pulse">●</span>
+                        </div>
+                        <div id="logic-log" class="h-6 overflow-hidden text-slate-500 truncate">
+                            > system ready. waiting for user interaction...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </section>
+
+        <!-- WHY ME -->
+        <section class="py-20 relative">
+            <div class="max-w-5xl mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Perché Scegliere Questo Approccio?</h2>
+                    <p class="text-slate-400 text-lg">Non sto vendendo competenze tecniche. Sto vendendo <strong
+                            class="text-white">visione sistemica</strong>.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="glass-panel p-6 rounded-xl border-t-4 border-blue-500">
+                        <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-4">
+                            <i data-lucide="brain" class="w-6 h-6 text-blue-400"></i>
+                        </div>
+                        <h4 class="text-white font-bold mb-3">Penso come un Founder</h4>
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            Non mi limito a eseguire task. Mi chiedo: "Questa feature porta soldi? Questo bug quanto ci
+                            costa in churn?".
+                            Tratto il sito come se fosse il mio business.
+                        </p>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-xl border-t-4 border-purple-500">
+                        <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center mb-4">
+                            <i data-lucide="code-2" class="w-6 h-6 text-purple-400"></i>
+                        </div>
+                        <h4 class="text-white font-bold mb-3">Conosco il Codice</h4>
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            Da full stack developer, non dipendo dai freelancer per capire "se è fattibile".
+                            So già quanto costa implementare, quali sono i rischi, e come mitigarli.
+                        </p>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-xl border-t-4 border-green-500">
+                        <div class="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mb-4">
+                            <i data-lucide="trending-up" class="w-6 h-6 text-green-400"></i>
+                        </div>
+                        <h4 class="text-white font-bold mb-3">Misuro Tutto</h4>
+                        <p class="text-sm text-slate-400 leading-relaxed">
+                            Ogni decisione è data-driven. Non "credo" che funzionerà — lo <strong
+                                class="text-white">valido con A/B test</strong>.
+                            Se una feature non muove il needle, la taglio senza pietà.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-12 glass-panel p-8 rounded-xl border-l-4 border-yellow-500">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="lightbulb" class="w-5 h-5 text-yellow-400"></i>
+                        </div>
+                        <div class="prose-text">
+                            <h4 class="text-white font-bold text-lg mb-2">La Differenza tra Me e un Candidato Standard
+                            </h4>
+                            <p class="text-slate-300 text-sm">
+                                Un Website Manager classico gestisce il sito. <strong class="text-white">Io costruisco
+                                    un'infrastruttura di crescita</strong>.
+                                Non carico prodotti — automatizzo il caricamento. Non "miglioro UX" — implemento flussi
+                                che aumentano l'AOV del 15%.
+                                Non "fixo bug" — prevedo i problemi con monitoring proattivo.
+                                <br><br>
+                                <span class="text-green-400 font-bold">Ho strutturato questo test come un Business Case
+                                    perché so che TargheProfessionali.it non ha bisogno di un esecutore, ma di un
+                                    co-pilota strategico.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="py-24 text-center">
+            <div class="max-w-3xl mx-auto px-6 reveal">
+                <h2 class="text-4xl font-bold text-white mb-8">Investimento, non Costo.</h2>
+                <p class="text-slate-400 mb-8 text-lg">Le soluzioni proposte si pagano da sole nel primo trimestre
+                    grazie all'aumento di efficienza e conversioni.</p>
+                <div class="flex justify-center gap-6">
+                    <a href="https://wa.me/393491119147?text=Ciao%20Giovanni,%20ho%20visto%20il%20tuo%20test%20tecnico%20e%20sono%20interessato"
+                        target="_blank"
+                        class="px-10 py-4 bg-white text-black rounded-lg font-bold hover:scale-105 transition-transform shadow-[0_0_30px_rgba(255,255,255,0.2)] inline-block">Assumimi
+                        Ora</a>
+                </div>
+            </div>
+            <footer class="mt-20 pt-10 border-t border-white/10 text-[10px] text-slate-600 uppercase tracking-widest">
+                Giovanni Enrique Polimeni - 2026 - Confidential Technical Test
+            </footer>
+        </section>
+
+    </main>
+
+    <div id="console-panel"
+        class="fixed bottom-0 left-0 right-0 h-32 bg-[#050910]/95 backdrop-blur-md border-t border-white/10 z-40 flex flex-col font-mono text-xs shadow-[0_-10px_40px_rgba(0,0,0,0.5)] transition-transform duration-300 translate-y-0">
+        <div class="flex items-center justify-between px-6 py-2 bg-white/5 border-b border-white/5 text-[10px] text-slate-500 select-none cursor-pointer"
+            onclick="toggleConsole()">
+            <div class="flex gap-2 items-center">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span>SYSTEM CONSOLE</span>
+            </div>
+            <div class="flex gap-2"><span>_</span><span>□</span><span>x</span></div>
+        </div>
+        <div id="console-output" class="flex-1 p-4 overflow-y-auto custom-scroll text-slate-400 space-y-1">
+            <span class="console-line">> system initialized. waiting for input...</span>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // --- WAVE ANIMATION ---
+        const canvas = document.getElementById('wave-canvas'); const ctx = canvas.getContext('2d');
+        let width, height, waves = [];
+        class Wave { constructor(y, color, speed, amplitude) { this.y = y; this.color = color; this.speed = speed; this.amplitude = amplitude; this.offset = Math.random() * 100; } draw(time) { ctx.beginPath(); ctx.moveTo(0, this.y); for (let i = 0; i < width; i++) { ctx.lineTo(i, this.y + Math.sin(i * 0.003 + time * this.speed + this.offset) * this.amplitude); } ctx.lineTo(width, height); ctx.lineTo(0, height); ctx.closePath(); ctx.fillStyle = this.color; ctx.fill(); } }
+        function init() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; waves = [new Wave(height * 0.6, 'rgba(59, 130, 246, 0.05)', 0.002, 50), new Wave(height * 0.7, 'rgba(139, 92, 246, 0.05)', 0.003, 40)]; }
+        let time = 0; function animate() { ctx.clearRect(0, 0, width, height); const gradient = ctx.createRadialGradient(width / 2, height * 0.3, 0, width / 2, height, width); gradient.addColorStop(0, '#0f172a'); gradient.addColorStop(1, '#000000'); ctx.fillStyle = gradient; ctx.fillRect(0, 0, width, height); waves.forEach(wave => wave.draw(time)); time += 1; requestAnimationFrame(animate); }
+        window.addEventListener('resize', init); init(); animate();
+
+        // --- SCROLL REVEAL ---
+        const observer = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); }); }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        window.onscroll = () => { let winScroll = document.documentElement.scrollTop; let height = document.documentElement.scrollHeight - document.documentElement.clientHeight; document.getElementById("progress-bar").style.width = (winScroll / height) * 100 + "%"; };
+
+        // --- CONSOLE & DEMO LOGIC ---
+        let isConsoleOpen = true;
+        function log(msg, type = 'info') {
+            const consoleOut = document.getElementById('console-output');
+            const span = document.createElement('span');
+            span.className = 'console-line animate-pulse';
+            const timestamp = new Date().toLocaleTimeString('it-IT', { hour12: false });
+            let colorClass = 'text-slate-400';
+            if (type === 'success') colorClass = 'console-success';
+            if (type === 'warn') colorClass = 'console-warn';
+            if (type === 'info') colorClass = 'console-info';
+            span.classList.add(colorClass);
+            span.innerHTML = `<span class="opacity-50">[${timestamp}]</span> ${msg}`;
+            consoleOut.appendChild(span);
+            consoleOut.scrollTop = consoleOut.scrollHeight;
+            setTimeout(() => span.classList.remove('animate-pulse'), 500);
+        }
+
+        // CONSOLE LOGIC
+        function toggleConsole() {
+            const el = document.getElementById('console-panel');
+            isConsoleOpen = !isConsoleOpen;
+            el.style.transform = isConsoleOpen ? 'translateY(0)' : 'translateY(85%)';
+        }
+
+        // --- CONFIGURATOR DEMO LOGIC ---
+        let currentMaterial = 'ottone';
+        let currentColor = 'gold';
+        let currentText = '';
+        const basePrice = { ottone: 85, plexiglass: 40 };
+
+        // 3D Tilt Logic
+        function rotatePlate(e) {
+            const card = document.getElementById('preview-container');
+            const plate = document.getElementById('plate-preview');
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const rotateX = ((y - centerY) / centerY) * -10; // Max -10 to 10 deg
+            const rotateY = ((x - centerX) / centerX) * 10;
+
+            plate.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        }
+
+        function resetRotate() {
+            const plate = document.getElementById('plate-preview');
+            plate.style.transform = `rotateX(0deg) rotateY(0deg)`;
+        }
+
+        function setMaterial(mat) {
+            currentMaterial = mat;
+            const btnOttone = document.getElementById('btn-ottone');
+            const btnPlexi = document.getElementById('btn-plexi');
+            const plate = document.getElementById('plate-preview');
+            const txt = document.getElementById('preview-text-main');
+            const sub = document.getElementById('preview-text-sub');
+
+            // Buttons UI (Active State)
+            if (mat === 'ottone') {
+                btnOttone.className = "py-3 px-3 rounded-lg border border-slate-200 bg-gradient-to-br from-orange-50 to-orange-100 text-xs font-bold text-slate-800 ring-2 ring-yellow-600 shadow-lg transition-all flex items-center justify-center gap-2 transform scale-105";
+                btnPlexi.className = "py-3 px-3 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-500 hover:border-blue-400 transition-all flex items-center justify-center gap-2 grayscale";
+
+                // Plate Look
+                plate.className = "w-full max-w-[280px] h-40 rounded targa-real mat-gold flex flex-col items-center justify-center transition-all duration-500";
+                txt.className = "text-etched text-3xl font-bold mb-2 tracking-wide";
+                sub.className = "text-etched text-[10px] uppercase tracking-[0.2em] opacity-80";
+
+                // Enable Colors
+                document.getElementById('color-section').style.opacity = '1';
+                document.getElementById('color-section').style.pointerEvents = 'auto';
+                setColor('gold');
+            } else {
+                btnPlexi.className = "py-3 px-3 rounded-lg border border-blue-400 bg-blue-50 text-xs font-bold text-blue-900 ring-2 ring-blue-500 shadow-lg transition-all flex items-center justify-center gap-2 transform scale-105";
+                btnOttone.className = "py-3 px-3 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-500 hover:border-yellow-400 transition-all flex items-center justify-center gap-2 grayscale";
+
+                // Plate Look (Plexi)
+                plate.className = "w-full max-w-[280px] h-40 rounded targa-real mat-plexi flex flex-col items-center justify-center transition-all duration-500";
+                txt.className = "text-plexi text-3xl font-bold mb-2 tracking-wide";
+                sub.className = "text-plexi text-[10px] uppercase tracking-[0.2em] opacity-80";
+
+                // Disable Colors
+                document.getElementById('color-section').style.opacity = '0.3';
+                document.getElementById('color-section').style.pointerEvents = 'none';
+            }
+
+            document.getElementById('price-display').innerHTML = `€${basePrice[mat]}<span class="text-lg font-normal text-slate-500">.00</span>`;
+
+            log(`> set_material: ${mat} | material_changed`, 'info');
+            updateLogicLog(`Material: ${mat.toUpperCase()}. Re-rendering 3D texture.`);
+            validateCart();
+        }
+
+        function setColor(col) {
+            currentColor = col;
+            const plate = document.getElementById('plate-preview');
+            const txt = document.getElementById('preview-text-main');
+            const sub = document.getElementById('preview-text-sub');
+
+            // Reset rings
+            ['gold', 'silver', 'black'].forEach(c => {
+                const btn = document.getElementById('btn-' + c);
+                btn.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-500', 'scale-110', 'opacity-100');
+                btn.classList.add('opacity-60');
+            });
+            // Set active
+            const btn = document.getElementById('btn-' + col);
+            btn.classList.remove('opacity-60');
+            btn.classList.add('ring-2', 'ring-offset-2', 'ring-blue-500', 'scale-110', 'opacity-100');
+
+            // Apply specific material styles
+            if (currentMaterial === 'ottone') {
+                if (col === 'gold') {
+                    plate.style.backgroundImage = "url('https://www.transparenttextures.com/patterns/brushed-alum.png'), linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%)";
+                    plate.style.borderColor = "#b38728";
+                    txt.style.color = "#3e2c09"; sub.style.color = "#3e2c09";
+                } else if (col === 'silver') {
+                    plate.style.backgroundImage = "url('https://www.transparenttextures.com/patterns/brushed-alum.png'), linear-gradient(135deg, #e2e8f0 0%, #f8fafc 50%, #cbd5e1 100%)";
+                    plate.style.borderColor = "#94a3b8";
+                    txt.style.color = "#1e293b"; sub.style.color = "#1e293b";
+                } else if (col === 'black') {
+                    plate.style.backgroundImage = "url('https://www.transparenttextures.com/patterns/carbon-fibre.png'), linear-gradient(135deg, #1e293b 0%, #0f172a 100%)";
+                    plate.style.borderColor = "#334155";
+                    txt.style.color = "#e2e8f0"; sub.style.color = "#94a3b8";
+                }
+            }
+
+            updateLogicLog(`Finish applied: ${col.toUpperCase()}. Texture mix-blend-mode updated.`);
+        }
+
+        function updateText(val) {
+            currentText = val;
+            const display = document.getElementById('preview-text-main');
+            display.innerText = val || "Dott. Rossi";
+            validateCart();
+        }
+
+        function validateCart() {
+            const btn = document.getElementById('add-to-cart');
+            const isValid = currentText.length > 2; // Min 3 chars
+
+            if (isValid) {
+                btn.disabled = false;
+                btn.className = "px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] cursor-pointer transition-all text-xs transform hover:-translate-y-1 hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)]";
+                btn.innerText = "AGGIUNGI ORA";
+                updateLogicLog(`Cart VALID. Enable Checkout.`);
+            } else {
+                btn.disabled = true;
+                btn.className = "px-8 py-4 bg-slate-200 text-slate-400 font-bold rounded-xl cursor-not-allowed transition-all text-xs shadow-none";
+                btn.innerText = "INSERISCI TESTO";
+            }
+        }
+
+        function updateLogicLog(msg) {
+            const el = document.getElementById('logic-log');
+            el.innerText = `> ${msg}`;
+            el.classList.add('text-green-400');
+            setTimeout(() => el.classList.remove('text-green-400'), 300);
+        }
+
+        // DATA CLEANER DEMO
+        function runDataCleaner() {
+            const btn = document.getElementById('btn-cleaner');
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> PROCESSING...`;
+            lucide.createIcons();
+            log('> initializing pandas environment...', 'info');
+            setTimeout(() => { log('> reading "master_products.xlsx"...', 'info'); }, 500);
+            setTimeout(() => { log('> normalizing attributes (3mm, 3 mm -> 3 mm)...', 'warn'); }, 1200);
+            setTimeout(() => { log('> generating image names from SKU...', 'warn'); }, 1800);
+            setTimeout(() => {
+                document.getElementById('data-status-light').className = "w-2 h-2 bg-green-500 rounded-full";
+                document.getElementById('data-status-text').innerText = "PYTHON SCRIPT COMPLETED";
+                document.getElementById('data-status-text').classList.add('text-green-500');
+                document.getElementById('demo-table-body').innerHTML = `
+                    <tr><td>TRG-01</td><td class="text-green-400">3 mm</td><td class="text-green-500 text-right">OK</td></tr>
+                    <tr><td>TRG-02</td><td class="text-green-400">3 mm</td><td class="text-green-500 text-right">OK</td></tr>
+                    <tr><td>TRG-03</td><td class="text-green-400">3 mm</td><td class="text-green-500 text-right">OK</td></tr>
+                `;
+                log('> export "prestashop_ready.csv" success.', 'success');
+                btn.innerHTML = `<i data-lucide="check" class="w-3 h-3"></i> CSV READY`;
+                btn.classList.add('bg-green-600', 'hover:bg-green-600');
+                lucide.createIcons();
+            }, 3000);
+        }
+
+        // LCP OPTIMIZER DEMO
+        function optimizeLCP() {
+            const btn = document.getElementById('btn-opt');
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> DEPLOYING FIXES...`;
+            lucide.createIcons();
+            log('> task: convert_webp start...', 'info');
+            setTimeout(() => { log('> implementing srcset for "Categoría Targhe"...', 'warn'); }, 800);
+            setTimeout(() => { log('> deferring theme.js & sliders...', 'info'); }, 1500);
+            setTimeout(() => {
+                const img = document.getElementById('demo-image');
+                img.classList.remove('opacity-40', 'blur-sm');
+                img.classList.add('opacity-100', 'blur-0');
+                document.getElementById('img-label').innerText = "OPTIMIZED (WebP 300KB)";
+                document.getElementById('img-label').className = "bg-green-500/90 text-white px-3 py-1 rounded text-xs font-mono font-bold shadow-lg shadow-green-500/50";
+                document.getElementById('lcp-badge').innerText = "LCP: 0.8s";
+                document.getElementById('lcp-badge').className = "absolute top-4 right-4 bg-green-500/20 border border-green-500 text-green-500 px-3 py-1 rounded text-xs font-bold transition-all";
+                log('> user story completed: LCP < 2.5s achieved.', 'success');
+                btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> FIX DEPLOYED`;
+                btn.classList.add('bg-green-600', 'hover:bg-green-600', 'text-white');
+                lucide.createIcons();
+            }, 2500);
+        }
+    </script>
+</body>
+
+</html>
