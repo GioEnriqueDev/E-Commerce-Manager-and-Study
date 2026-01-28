@@ -1118,260 +1118,262 @@
     </div>
 
     <script>
-        lucide.createIcons();
+        document.addEventListener("DOMContentLoaded", function () {
+            lucide.createIcons();
 
-        // --- WAVE ANIMATION OPTIMIZED ---
-        const canvas = document.getElementById('wave-canvas'); const ctx = canvas.getContext('2d');
-        let width, height, waves = [];
-        // Mobile Optimization: Reduce resolution on small screens
-        const dpr = window.devicePixelRatio || 1;
-        const isMobile = window.innerWidth < 768;
-        const resolution = isMobile ? 0.5 : 1;
+            // --- WAVE ANIMATION OPTIMIZED ---
+            const canvas = document.getElementById('wave-canvas'); const ctx = canvas.getContext('2d');
+            let width, height, waves = [];
+            // Mobile Optimization: Reduce resolution on small screens
+            const dpr = window.devicePixelRatio || 1;
+            const isMobile = window.innerWidth < 768;
+            const resolution = isMobile ? 0.5 : 1;
 
-        class Wave { constructor(y, color, speed, amplitude) { this.y = y; this.color = color; this.speed = speed; this.amplitude = amplitude; this.offset = Math.random() * 100; } draw(time) { ctx.beginPath(); ctx.moveTo(0, this.y); for (let i = 0; i < width; i += (isMobile ? 10 : 1)) { ctx.lineTo(i, this.y + Math.sin(i * 0.003 + time * this.speed + this.offset) * this.amplitude); } ctx.lineTo(width, height); ctx.lineTo(0, height); ctx.closePath(); ctx.fillStyle = this.color; ctx.fill(); } }
+            class Wave { constructor(y, color, speed, amplitude) { this.y = y; this.color = color; this.speed = speed; this.amplitude = amplitude; this.offset = Math.random() * 100; } draw(time) { ctx.beginPath(); ctx.moveTo(0, this.y); for (let i = 0; i < width; i += (isMobile ? 10 : 1)) { ctx.lineTo(i, this.y + Math.sin(i * 0.003 + time * this.speed + this.offset) * this.amplitude); } ctx.lineTo(width, height); ctx.lineTo(0, height); ctx.closePath(); ctx.fillStyle = this.color; ctx.fill(); } }
 
-        function init() {
-            width = canvas.width = window.innerWidth * resolution;
-            height = canvas.height = window.innerHeight * resolution;
-            // Scale context to match if not full res (optional, but keep simple for perf)
-            // if(resolution !== 1) ctx.scale(resolution, resolution);
+            function init() {
+                width = canvas.width = window.innerWidth * resolution;
+                height = canvas.height = window.innerHeight * resolution;
+                // Scale context to match if not full res (optional, but keep simple for perf)
+                // if(resolution !== 1) ctx.scale(resolution, resolution);
 
-            waves = [new Wave(height * 0.6, 'rgba(59, 130, 246, 0.05)', 0.002, 50), new Wave(height * 0.7, 'rgba(139, 92, 246, 0.05)', 0.003, 40)];
-        }
-
-        let time = 0;
-        function animate() {
-            ctx.clearRect(0, 0, width, height);
-            const gradient = ctx.createRadialGradient(width / 2, height * 0.3, 0, width / 2, height, width);
-            gradient.addColorStop(0, '#0f172a');
-            gradient.addColorStop(1, '#000000');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, width, height);
-            waves.forEach(wave => wave.draw(time));
-            time += 1;
-            requestAnimationFrame(animate);
-        }
-        window.addEventListener('resize', init); init(); animate();
-
-        // --- SCROLL REVEAL ---
-        const observer = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); }); }, { threshold: 0.1 });
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-        window.onscroll = () => { let winScroll = document.documentElement.scrollTop; let height = document.documentElement.scrollHeight - document.documentElement.clientHeight; document.getElementById("progress-bar").style.width = (winScroll / height) * 100 + "%"; };
-
-        // --- CONSOLE & DEMO LOGIC ---
-        let isConsoleOpen = true;
-        function log(msg, type = 'info') {
-            const consoleOut = document.getElementById('console-output');
-            const span = document.createElement('span');
-            span.className = 'console-line animate-pulse';
-            const timestamp = new Date().toLocaleTimeString('it-IT', { hour12: false });
-            let colorClass = 'text-slate-400';
-            if (type === 'success') colorClass = 'console-success';
-            if (type === 'warn') colorClass = 'console-warn';
-            if (type === 'info') colorClass = 'console-info';
-            span.classList.add(colorClass);
-            span.innerHTML = `<span class="opacity-50">[${timestamp}]</span> ${msg}`;
-            consoleOut.appendChild(span);
-            consoleOut.scrollTop = consoleOut.scrollHeight;
-            setTimeout(() => span.classList.remove('animate-pulse'), 500);
-        }
-
-        // CONSOLE LOGIC
-        function toggleConsole() {
-            const el = document.getElementById('console-panel');
-            isConsoleOpen = !isConsoleOpen;
-            el.style.transform = isConsoleOpen ? 'translateY(0)' : 'translateY(85%)';
-        }
-
-        // --- CONFIGURATOR DEMO LOGIC ---
-        let currentMaterial = 'ottone';
-        let currentColor = 'gold';
-        let currentText = '';
-        const basePrice = { ottone: 85, plexiglass: 40 };
-
-        // 3D Tilt Logic
-        function rotatePlate(e) {
-            const card = document.getElementById('preview-container');
-            const plate = document.getElementById('plate-preview');
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-
-            const rotateX = ((y - centerY) / centerY) * -10; // Max -10 to 10 deg
-            const rotateY = ((x - centerX) / centerX) * 10;
-
-            plate.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-        }
-
-        function resetRotate() {
-            const plate = document.getElementById('plate-preview');
-            plate.style.transform = `rotateX(0deg) rotateY(0deg)`;
-        }
-
-        function setMaterial(mat) {
-            currentMaterial = mat;
-            const btnOttone = document.getElementById('btn-ottone');
-            const btnPlexi = document.getElementById('btn-plexi');
-            const plate = document.getElementById('plate-preview');
-            const txt = document.getElementById('preview-text-main');
-            const sub = document.getElementById('preview-text-sub');
-
-            // Buttons UI (Active State)
-            if (mat === 'ottone') {
-                btnOttone.className = "py-3 px-3 rounded-lg border border-slate-200 bg-gradient-to-br from-orange-50 to-orange-100 text-xs font-bold text-slate-800 ring-2 ring-yellow-600 shadow-lg transition-all flex items-center justify-center gap-2 transform scale-105";
-                btnPlexi.className = "py-3 px-3 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-500 hover:border-blue-400 transition-all flex items-center justify-center gap-2 grayscale";
-
-                // Plate Look
-                plate.className = "w-full max-w-[280px] h-40 rounded targa-real mat-gold flex flex-col items-center justify-center transition-all duration-500";
-                txt.className = "text-etched text-3xl font-bold mb-2 tracking-wide";
-                sub.className = "text-etched text-[10px] uppercase tracking-[0.2em] opacity-80";
-
-                // Enable Colors
-                document.getElementById('color-section').style.opacity = '1';
-                document.getElementById('color-section').style.pointerEvents = 'auto';
-                setColor('gold');
-            } else {
-                btnPlexi.className = "py-3 px-3 rounded-lg border border-blue-400 bg-blue-50 text-xs font-bold text-blue-900 ring-2 ring-blue-500 shadow-lg transition-all flex items-center justify-center gap-2 transform scale-105";
-                btnOttone.className = "py-3 px-3 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-500 hover:border-yellow-400 transition-all flex items-center justify-center gap-2 grayscale";
-
-                // Plate Look (Plexi)
-                plate.className = "w-full max-w-[280px] h-40 rounded targa-real mat-plexi flex flex-col items-center justify-center transition-all duration-500";
-                txt.className = "text-plexi text-3xl font-bold mb-2 tracking-wide";
-                sub.className = "text-plexi text-[10px] uppercase tracking-[0.2em] opacity-80";
-
-                // Disable Colors
-                document.getElementById('color-section').style.opacity = '0.3';
-                document.getElementById('color-section').style.pointerEvents = 'none';
+                waves = [new Wave(height * 0.6, 'rgba(59, 130, 246, 0.05)', 0.002, 50), new Wave(height * 0.7, 'rgba(139, 92, 246, 0.05)', 0.003, 40)];
             }
 
-            document.getElementById('price-display').innerHTML = `€${basePrice[mat]}<span class="text-lg font-normal text-slate-500">.00</span>`;
+            let time = 0;
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                const gradient = ctx.createRadialGradient(width / 2, height * 0.3, 0, width / 2, height, width);
+                gradient.addColorStop(0, '#0f172a');
+                gradient.addColorStop(1, '#000000');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+                waves.forEach(wave => wave.draw(time));
+                time += 1;
+                requestAnimationFrame(animate);
+            }
+            window.addEventListener('resize', init); init(); animate();
 
-            log(`> set_material: ${mat} | material_changed`, 'info');
-            updateLogicLog(`Material: ${mat.toUpperCase()}. Re-rendering 3D texture.`);
-            validateCart();
-        }
+            // --- SCROLL REVEAL ---
+            const observer = new IntersectionObserver((entries) => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); }); }, { threshold: 0.1 });
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+            window.onscroll = () => { let winScroll = document.documentElement.scrollTop; let height = document.documentElement.scrollHeight - document.documentElement.clientHeight; document.getElementById("progress-bar").style.width = (winScroll / height) * 100 + "%"; };
 
-        function setColor(col) {
-            currentColor = col;
-            const plate = document.getElementById('plate-preview');
-            const txt = document.getElementById('preview-text-main');
-            const sub = document.getElementById('preview-text-sub');
+            // --- CONSOLE & DEMO LOGIC ---
+            let isConsoleOpen = true;
+            function log(msg, type = 'info') {
+                const consoleOut = document.getElementById('console-output');
+                const span = document.createElement('span');
+                span.className = 'console-line animate-pulse';
+                const timestamp = new Date().toLocaleTimeString('it-IT', { hour12: false });
+                let colorClass = 'text-slate-400';
+                if (type === 'success') colorClass = 'console-success';
+                if (type === 'warn') colorClass = 'console-warn';
+                if (type === 'info') colorClass = 'console-info';
+                span.classList.add(colorClass);
+                span.innerHTML = `<span class="opacity-50">[${timestamp}]</span> ${msg}`;
+                consoleOut.appendChild(span);
+                consoleOut.scrollTop = consoleOut.scrollHeight;
+                setTimeout(() => span.classList.remove('animate-pulse'), 500);
+            }
 
-            // Reset rings
-            ['gold', 'silver', 'black'].forEach(c => {
-                const btn = document.getElementById('btn-' + c);
-                btn.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-500', 'scale-110', 'opacity-100');
-                btn.classList.add('opacity-60');
-            });
-            // Set active
-            const btn = document.getElementById('btn-' + col);
-            btn.classList.remove('opacity-60');
-            btn.classList.add('ring-2', 'ring-offset-2', 'ring-blue-500', 'scale-110', 'opacity-100');
+            // CONSOLE LOGIC
+            function toggleConsole() {
+                const el = document.getElementById('console-panel');
+                isConsoleOpen = !isConsoleOpen;
+                el.style.transform = isConsoleOpen ? 'translateY(0)' : 'translateY(85%)';
+            }
 
-            // Apply specific material styles
-            if (currentMaterial === 'ottone') {
-                if (col === 'gold') {
-                    plate.style.backgroundImage = "url('https://www.transparenttextures.com/patterns/brushed-alum.png'), linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%)";
-                    plate.style.borderColor = "#b38728";
-                    txt.style.color = "#3e2c09"; sub.style.color = "#3e2c09";
-                } else if (col === 'silver') {
-                    plate.style.backgroundImage = "url('https://www.transparenttextures.com/patterns/brushed-alum.png'), linear-gradient(135deg, #e2e8f0 0%, #f8fafc 50%, #cbd5e1 100%)";
-                    plate.style.borderColor = "#94a3b8";
-                    txt.style.color = "#1e293b"; sub.style.color = "#1e293b";
-                } else if (col === 'black') {
-                    plate.style.backgroundImage = "url('https://www.transparenttextures.com/patterns/carbon-fibre.png'), linear-gradient(135deg, #1e293b 0%, #0f172a 100%)";
-                    plate.style.borderColor = "#334155";
-                    txt.style.color = "#e2e8f0"; sub.style.color = "#94a3b8";
+            // --- CONFIGURATOR DEMO LOGIC ---
+            let currentMaterial = 'ottone';
+            let currentColor = 'gold';
+            let currentText = '';
+            const basePrice = { ottone: 85, plexiglass: 40 };
+
+            // 3D Tilt Logic
+            function rotatePlate(e) {
+                const card = document.getElementById('preview-container');
+                const plate = document.getElementById('plate-preview');
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                const rotateX = ((y - centerY) / centerY) * -10; // Max -10 to 10 deg
+                const rotateY = ((x - centerX) / centerX) * 10;
+
+                plate.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            }
+
+            function resetRotate() {
+                const plate = document.getElementById('plate-preview');
+                plate.style.transform = `rotateX(0deg) rotateY(0deg)`;
+            }
+
+            function setMaterial(mat) {
+                currentMaterial = mat;
+                const btnOttone = document.getElementById('btn-ottone');
+                const btnPlexi = document.getElementById('btn-plexi');
+                const plate = document.getElementById('plate-preview');
+                const txt = document.getElementById('preview-text-main');
+                const sub = document.getElementById('preview-text-sub');
+
+                // Buttons UI (Active State)
+                if (mat === 'ottone') {
+                    btnOttone.className = "py-3 px-3 rounded-lg border border-slate-200 bg-gradient-to-br from-orange-50 to-orange-100 text-xs font-bold text-slate-800 ring-2 ring-yellow-600 shadow-lg transition-all flex items-center justify-center gap-2 transform scale-105";
+                    btnPlexi.className = "py-3 px-3 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-500 hover:border-blue-400 transition-all flex items-center justify-center gap-2 grayscale";
+
+                    // Plate Look
+                    plate.className = "w-full max-w-[280px] h-40 rounded targa-real mat-gold flex flex-col items-center justify-center transition-all duration-500";
+                    txt.className = "text-etched text-3xl font-bold mb-2 tracking-wide";
+                    sub.className = "text-etched text-[10px] uppercase tracking-[0.2em] opacity-80";
+
+                    // Enable Colors
+                    document.getElementById('color-section').style.opacity = '1';
+                    document.getElementById('color-section').style.pointerEvents = 'auto';
+                    setColor('gold');
+                } else {
+                    btnPlexi.className = "py-3 px-3 rounded-lg border border-blue-400 bg-blue-50 text-xs font-bold text-blue-900 ring-2 ring-blue-500 shadow-lg transition-all flex items-center justify-center gap-2 transform scale-105";
+                    btnOttone.className = "py-3 px-3 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-500 hover:border-yellow-400 transition-all flex items-center justify-center gap-2 grayscale";
+
+                    // Plate Look (Plexi)
+                    plate.className = "w-full max-w-[280px] h-40 rounded targa-real mat-plexi flex flex-col items-center justify-center transition-all duration-500";
+                    txt.className = "text-plexi text-3xl font-bold mb-2 tracking-wide";
+                    sub.className = "text-plexi text-[10px] uppercase tracking-[0.2em] opacity-80";
+
+                    // Disable Colors
+                    document.getElementById('color-section').style.opacity = '0.3';
+                    document.getElementById('color-section').style.pointerEvents = 'none';
+                }
+
+                document.getElementById('price-display').innerHTML = `€${basePrice[mat]}<span class="text-lg font-normal text-slate-500">.00</span>`;
+
+                log(`> set_material: ${mat} | material_changed`, 'info');
+                updateLogicLog(`Material: ${mat.toUpperCase()}. Re-rendering 3D texture.`);
+                validateCart();
+            }
+
+            function setColor(col) {
+                currentColor = col;
+                const plate = document.getElementById('plate-preview');
+                const txt = document.getElementById('preview-text-main');
+                const sub = document.getElementById('preview-text-sub');
+
+                // Reset rings
+                ['gold', 'silver', 'black'].forEach(c => {
+                    const btn = document.getElementById('btn-' + c);
+                    btn.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-500', 'scale-110', 'opacity-100');
+                    btn.classList.add('opacity-60');
+                });
+                // Set active
+                const btn = document.getElementById('btn-' + col);
+                btn.classList.remove('opacity-60');
+                btn.classList.add('ring-2', 'ring-offset-2', 'ring-blue-500', 'scale-110', 'opacity-100');
+
+                // Apply specific material styles
+                if (currentMaterial === 'ottone') {
+                    if (col === 'gold') {
+                        plate.style.backgroundImage = "url('https://www.transparenttextures.com/patterns/brushed-alum.png'), linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%)";
+                        plate.style.borderColor = "#b38728";
+                        txt.style.color = "#3e2c09"; sub.style.color = "#3e2c09";
+                    } else if (col === 'silver') {
+                        plate.style.backgroundImage = "url('https://www.transparenttextures.com/patterns/brushed-alum.png'), linear-gradient(135deg, #e2e8f0 0%, #f8fafc 50%, #cbd5e1 100%)";
+                        plate.style.borderColor = "#94a3b8";
+                        txt.style.color = "#1e293b"; sub.style.color = "#1e293b";
+                    } else if (col === 'black') {
+                        plate.style.backgroundImage = "url('https://www.transparenttextures.com/patterns/carbon-fibre.png'), linear-gradient(135deg, #1e293b 0%, #0f172a 100%)";
+                        plate.style.borderColor = "#334155";
+                        txt.style.color = "#e2e8f0"; sub.style.color = "#94a3b8";
+                    }
+                }
+
+                updateLogicLog(`Finish applied: ${col.toUpperCase()}. Texture mix-blend-mode updated.`);
+            }
+
+            function updateText(val) {
+                currentText = val;
+                const display = document.getElementById('preview-text-main');
+                display.innerText = val || "Dott. Rossi";
+                validateCart();
+            }
+
+            function validateCart() {
+                const btn = document.getElementById('add-to-cart');
+                const isValid = currentText.length > 2; // Min 3 chars
+
+                if (isValid) {
+                    btn.disabled = false;
+                    btn.className = "px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] cursor-pointer transition-all text-xs transform hover:-translate-y-1 hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)]";
+                    btn.innerText = "AGGIUNGI ORA";
+                    updateLogicLog(`Cart VALID. Enable Checkout.`);
+                } else {
+                    btn.disabled = true;
+                    btn.className = "px-8 py-4 bg-slate-200 text-slate-400 font-bold rounded-xl cursor-not-allowed transition-all text-xs shadow-none";
+                    btn.innerText = "INSERISCI TESTO";
                 }
             }
 
-            updateLogicLog(`Finish applied: ${col.toUpperCase()}. Texture mix-blend-mode updated.`);
-        }
-
-        function updateText(val) {
-            currentText = val;
-            const display = document.getElementById('preview-text-main');
-            display.innerText = val || "Dott. Rossi";
-            validateCart();
-        }
-
-        function validateCart() {
-            const btn = document.getElementById('add-to-cart');
-            const isValid = currentText.length > 2; // Min 3 chars
-
-            if (isValid) {
-                btn.disabled = false;
-                btn.className = "px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] cursor-pointer transition-all text-xs transform hover:-translate-y-1 hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)]";
-                btn.innerText = "AGGIUNGI ORA";
-                updateLogicLog(`Cart VALID. Enable Checkout.`);
-            } else {
-                btn.disabled = true;
-                btn.className = "px-8 py-4 bg-slate-200 text-slate-400 font-bold rounded-xl cursor-not-allowed transition-all text-xs shadow-none";
-                btn.innerText = "INSERISCI TESTO";
+            function updateLogicLog(msg) {
+                const el = document.getElementById('logic-log');
+                el.innerText = `> ${msg}`;
+                el.classList.add('text-green-400');
+                setTimeout(() => el.classList.remove('text-green-400'), 300);
             }
-        }
 
-        function updateLogicLog(msg) {
-            const el = document.getElementById('logic-log');
-            el.innerText = `> ${msg}`;
-            el.classList.add('text-green-400');
-            setTimeout(() => el.classList.remove('text-green-400'), 300);
-        }
-
-        // DATA CLEANER DEMO
-        function runDataCleaner() {
-            const btn = document.getElementById('btn-cleaner');
-            if (btn.disabled) return;
-            btn.disabled = true;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> PROCESSING...`;
-            lucide.createIcons();
-            log('> initializing pandas environment...', 'info');
-            setTimeout(() => { log('> reading "master_products.xlsx"...', 'info'); }, 500);
-            setTimeout(() => { log('> normalizing attributes (3mm, 3 mm -> 3 mm)...', 'warn'); }, 1200);
-            setTimeout(() => { log('> generating image names from SKU...', 'warn'); }, 1800);
-            setTimeout(() => {
-                document.getElementById('data-status-light').className = "w-2 h-2 bg-green-500 rounded-full";
-                document.getElementById('data-status-text').innerText = "PYTHON SCRIPT COMPLETED";
-                document.getElementById('data-status-text').classList.add('text-green-500');
-                document.getElementById('demo-table-body').innerHTML = `
+            // DATA CLEANER DEMO
+            function runDataCleaner() {
+                const btn = document.getElementById('btn-cleaner');
+                if (btn.disabled) return;
+                btn.disabled = true;
+                btn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> PROCESSING...`;
+                lucide.createIcons();
+                log('> initializing pandas environment...', 'info');
+                setTimeout(() => { log('> reading "master_products.xlsx"...', 'info'); }, 500);
+                setTimeout(() => { log('> normalizing attributes (3mm, 3 mm -> 3 mm)...', 'warn'); }, 1200);
+                setTimeout(() => { log('> generating image names from SKU...', 'warn'); }, 1800);
+                setTimeout(() => {
+                    document.getElementById('data-status-light').className = "w-2 h-2 bg-green-500 rounded-full";
+                    document.getElementById('data-status-text').innerText = "PYTHON SCRIPT COMPLETED";
+                    document.getElementById('data-status-text').classList.add('text-green-500');
+                    document.getElementById('demo-table-body').innerHTML = `
                     <tr><td>TRG-01</td><td class="text-green-400">3 mm</td><td class="text-green-500 text-right">OK</td></tr>
                     <tr><td>TRG-02</td><td class="text-green-400">3 mm</td><td class="text-green-500 text-right">OK</td></tr>
                     <tr><td>TRG-03</td><td class="text-green-400">3 mm</td><td class="text-green-500 text-right">OK</td></tr>
                 `;
-                log('> export "prestashop_ready.csv" success.', 'success');
-                btn.innerHTML = `<i data-lucide="check" class="w-3 h-3"></i> CSV READY`;
-                btn.classList.add('bg-green-600', 'hover:bg-green-600');
-                lucide.createIcons();
-            }, 3000);
-        }
+                    log('> export "prestashop_ready.csv" success.', 'success');
+                    btn.innerHTML = `<i data-lucide="check" class="w-3 h-3"></i> CSV READY`;
+                    btn.classList.add('bg-green-600', 'hover:bg-green-600');
+                    lucide.createIcons();
+                }, 3000);
+            }
 
-        // LCP OPTIMIZER DEMO
-        function optimizeLCP() {
-            const btn = document.getElementById('btn-opt');
-            if (btn.disabled) return;
-            btn.disabled = true;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> DEPLOYING FIXES...`;
-            lucide.createIcons();
-            log('> task: convert_webp start...', 'info');
-            setTimeout(() => { log('> implementing srcset for "Categoría Targhe"...', 'warn'); }, 800);
-            setTimeout(() => { log('> deferring theme.js & sliders...', 'info'); }, 1500);
-            setTimeout(() => {
-                const img = document.getElementById('demo-image');
-                img.classList.remove('opacity-40', 'blur-sm');
-                img.classList.add('opacity-100', 'blur-0');
-                document.getElementById('img-label').innerText = "OPTIMIZED (WebP 300KB)";
-                document.getElementById('img-label').className = "bg-green-500/90 text-white px-3 py-1 rounded text-xs font-mono font-bold shadow-lg shadow-green-500/50";
-                document.getElementById('lcp-badge').innerText = "LCP: 0.8s";
-                document.getElementById('lcp-badge').className = "absolute top-4 right-4 bg-green-500/20 border border-green-500 text-green-500 px-3 py-1 rounded text-xs font-bold transition-all";
-                log('> user story completed: LCP < 2.5s achieved.', 'success');
-                btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> FIX DEPLOYED`;
-                btn.classList.add('bg-green-600', 'hover:bg-green-600', 'text-white');
+            // LCP OPTIMIZER DEMO
+            function optimizeLCP() {
+                const btn = document.getElementById('btn-opt');
+                if (btn.disabled) return;
+                btn.disabled = true;
+                btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> DEPLOYING FIXES...`;
                 lucide.createIcons();
-            }, 2500);
-        }
+                log('> task: convert_webp start...', 'info');
+                setTimeout(() => { log('> implementing srcset for "Categoría Targhe"...', 'warn'); }, 800);
+                setTimeout(() => { log('> deferring theme.js & sliders...', 'info'); }, 1500);
+                setTimeout(() => {
+                    const img = document.getElementById('demo-image');
+                    img.classList.remove('opacity-40', 'blur-sm');
+                    img.classList.add('opacity-100', 'blur-0');
+                    document.getElementById('img-label').innerText = "OPTIMIZED (WebP 300KB)";
+                    document.getElementById('img-label').className = "bg-green-500/90 text-white px-3 py-1 rounded text-xs font-mono font-bold shadow-lg shadow-green-500/50";
+                    document.getElementById('lcp-badge').innerText = "LCP: 0.8s";
+                    document.getElementById('lcp-badge').className = "absolute top-4 right-4 bg-green-500/20 border border-green-500 text-green-500 px-3 py-1 rounded text-xs font-bold transition-all";
+                    log('> user story completed: LCP < 2.5s achieved.', 'success');
+                    btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> FIX DEPLOYED`;
+                    btn.classList.add('bg-green-600', 'hover:bg-green-600', 'text-white');
+                    lucide.createIcons();
+                }, 2500);
+            }
+        });
     </script>
 </body>
 
